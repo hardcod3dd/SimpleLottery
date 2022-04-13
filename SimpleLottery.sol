@@ -11,7 +11,7 @@ contract Lottery{
     
     // set variables
     address payable[] public players; 
-    address public owner; 
+    address payable public owner; 
     // mapping so only one user can enter
     mapping(address => bool) public hasEntered;
     // can reset  ?
@@ -19,8 +19,7 @@ contract Lottery{
     
     // set owner
     constructor(){
- 
-        owner = msg.sender; 
+        owner = payable(msg.sender); 
     }
     
     modifier onlyOwner() {
@@ -38,6 +37,7 @@ contract Lottery{
         receive () payable external checkEntered {
         require(msg.value == 1 ether);
         require(started == true);
+        require(msg.sender != owner);
         players.push(payable(msg.sender));
         hasEntered[msg.sender] = true;
     }
@@ -64,9 +64,9 @@ contract Lottery{
     
     
     // selecting the winner.resetting variable and set started false
-    function pickWinner() external onlyOwner {
+    function pickWinner() external {
         require(started == true);
-        require (players.length >= 3);
+        require (players.length >= 10);
         uint r = random();
         address payable winner;
         
@@ -74,8 +74,12 @@ contract Lottery{
     
         winner = players[index]; // this is the winner
         
+        uint managerFee = (getBalance() * 10 ) / 100; // manager fee is 10%
+        uint winnerPrize = (getBalance() * 90 ) / 100;     // winner prize is 90%
+
         // transferring the entire contract's balance to the winner
-        winner.transfer(getBalance());
+        owner.transfer(managerFee);
+        winner.transfer(winnerPrize);
         
         // resetting the lottery for the next round
         players = new address payable[](0);
