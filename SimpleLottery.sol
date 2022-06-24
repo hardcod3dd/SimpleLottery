@@ -21,7 +21,7 @@ contract Lottery{
     constructor(){
         owner = payable(msg.sender); 
     }
-    
+    // onlyowner modifier 
     modifier onlyOwner() {
         require(msg.sender == owner);
         _;
@@ -57,7 +57,7 @@ contract Lottery{
         return address(this).balance;
     }
     
-    // helper function that returns a big random integer
+    // helper function that returns a big random integer not safe or random. should be using chainlnk
     function random() internal view returns(uint){
        return uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, players.length)));
     }
